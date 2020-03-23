@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: server-deployment
@@ -37,9 +37,27 @@ spec:
         args: ["npm install; NODE_ENV=docker node /sugarizer-server/sugarizer.js /sugarizer-server/env/docker.ini"]
         env:
         - name: MONGO_URL
-          value: 'mongodb://mongodb.default.svc.cluster.local:27017/'
+          value: mongodb://mongodb.default.svc.cluster.local:27017/
         ports:
         - containerPort: 80
           name: http
         - containerPort: 8039
           name: presence
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-loadbalancer
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 80
+    name: http
+  - port: 8039
+    targetPort: 8039
+    name: presence
+  selector:
+    app: server
