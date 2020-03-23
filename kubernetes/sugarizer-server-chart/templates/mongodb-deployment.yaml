@@ -1,17 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "sugarizer-server-chart.fullname" . }}-database-deployment
+  name: database-deployment
+  labels:
+    app: mongodb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ template "sugarizer-server-chart.fullname" . }}-mongodb
+      app: mongodb
   template:
     metadata:
-      #name: mongodb-pod
+      name: mongodb-pod
       labels:
-        app: {{ template "sugarizer-server-chart.fullname" . }}-mongodb
+        app: mongodb
     spec:
       volumes:
       - name: nfs-volume

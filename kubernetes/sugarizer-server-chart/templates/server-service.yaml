@@ -1,8 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  #name: server-loadbalancer
-  name: {{ template "sugarizer-server-chart.fullname" . }}-service
+  name: server-loadbalancer
 spec:
   type: LoadBalancer
   ports:
@@ -13,5 +12,4 @@ spec:
     targetPort: 8039
     name: presence
   selector:
-    #app: server
-    app: {{ template "sugarizer-server-chart.fullname" . }}
+    app: server
