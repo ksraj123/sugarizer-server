@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-deployment
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      name: mongodb-pod
+      labels:
+        app: mongodb
+    spec:
+      volumes:
+      - name: nfs-volume
+        nfs:
+          server: 10.0.0.2
+          path: /sugarizer_vol/sugarizer-server/docker/db
+      containers:
+      - name: mongodb
+        image: mikkl/multiarch-mongodb:amd64
+        volumeMounts:
+        - name: nfs-volume
+          mountPath: /data/db
+        command: ["/bin/sh", "-c"]
+        args: ["mongod --repair; mongod"]
+        env:
+        - name: AUTH
+          value: "no"
+        ports:
+        - name: mongodb
+          containerPort: 27017
+          hostPort: 27017
+          protocol: TCP

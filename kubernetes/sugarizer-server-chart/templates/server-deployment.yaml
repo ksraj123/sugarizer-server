@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+  labels:
+    app: server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+        app: server
+  template:
+    metadata:
+        name: server-pod
+        labels:
+          app: server
+    spec:
+      volumes:
+        - name: sugarizer-server-vol
+          nfs:
+            server: 10.0.0.2
+            path: /sugarizer_vol/sugarizer-server
+        - name: sugarizer-client-vol
+          nfs:
+            server: 10.0.0.2
+            path: /sugarizer_vol/sugarizer-client
+      containers:
+      - name: sugarizer-server
+        image: llaske/multiarch-node6:amd64
+        volumeMounts:
+        - name: sugarizer-server-vol
+          mountPath: /sugarizer-server
+        - name: sugarizer-client-vol
+          mountPath: /sugarizer-client
+        workingDir: /sugarizer-server
+        command: ["/bin/sh", "-c"]
+        args: ["npm install; NODE_ENV=docker node /sugarizer-server/sugarizer.js /sugarizer-server/env/docker.ini"]
+        env:
+        - name: MONGO_URL
+          value: 'mongodb://mongodb.default.svc.cluster.local:27017/'
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 8039
+          name: presence
