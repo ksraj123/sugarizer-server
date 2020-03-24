@@ -1,0 +1,23 @@
+database:
+  image: mikkl/multiarch-mongodb:amd64
+  port: 27017
+
+server:
+  image: llaske/multiarch-node6:amd64
+  replicas: 3
+  serviceType: LoadBalancer
+  httpPortPod: 80
+  httpPortExternal: 8080
+  presencePort: 8039
+
+serverVolume:
+  name: sugarizer-server-vol
+  server: 10.0.0.2
+  path: /sugarizer_vol/sugarizer-server
+  mountPath: /sugarizer-server
+
+clientVolume:
+  name: sugarizer-client-vol
+  server: 10.0.0.2
+  path: /sugarizer_vol/sugarizer-client
+  mountPath: /sugarizer-client

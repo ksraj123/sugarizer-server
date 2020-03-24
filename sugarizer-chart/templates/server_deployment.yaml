@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "sugarizer-chart.fullname" . }}-deployment
+spec:
+  replicas: {{ .Values.server.replicas }}
+  selector:
+    matchLabels:
+        app: {{ template "sugarizer-chart.fullname" . }}-pod
+  template:
+    metadata:
+        labels:
+          app: {{ template "sugarizer-chart.fullname" . }}-pod
+    spec:
+      volumes:
+        - name: {{ .Values.serverVolume.name }}
+          nfs:
+            server: {{ .Values.serverVolume.server }}
+            path: {{ .Values.serverVolume.path }}
+        - name: {{ .Values.clientVolume.name }}
+          nfs:
+            server: {{ .Values.clientVolume.server }}
+            path: {{ .Values.clientVolume.path }}
+      containers:
+      - name: sugarizer-server
+        image: {{ .Values.server.image }}
+        volumeMounts:
+        - name: {{ .Values.serverVolume.name }}
+          mountPath: {{ .Values.serverVolume.mountPath }}
+        - name: {{ .Values.clientVolume.name }}
+          mountPath: {{ .Values.clientVolume.mountPath }}
+        workingDir: /sugarizer-server
+        command: ["/bin/sh", "-c"]
+        args: ["npm install; node /sugarizer-server/sugarizer.js /sugarizer-server/env/docker.ini"]
+        env:
+        - name: NODE_ENV
+          value: docker
+        - name: MONGO_URL
+          value: mongodb://{{ template "mongodb.fullname" . }}-service.default.svc.cluster.local:{{ .Values.database.port }}/
+        ports:
+        - containerPort: {{ .Values.server.httpPortPod }}
+          name: http
+        - containerPort: {{ .Values.server.presencePort }}
+          name: presence
