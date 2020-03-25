@@ -62,11 +62,15 @@ module.exports = function postLogin(req, res) {
 				req.flash('errors', {
 					msg: common.l10n.get('ErrorCode'+body.code)
 				});
-				return res.redirect('/dashboard/login');
+				return res.status(1000).send({
+					message: "error inside postLogin in inner"
+				});
 			}
 		});
 	} else {
 		req.flash('errors', errors);
-		return res.redirect('/dashboard/login');
+		return res.status(1001).send({
+			message: "error inside postLogin in outer"
+		});
 	}
 };
